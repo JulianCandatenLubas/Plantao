@@ -1,0 +1,629 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Escala de Plantao</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:system-ui,-apple-system,sans-serif;background:#f3f4f6;min-height:100vh;padding:24px 16px;color:#111}
+h1{font-size:22px;font-weight:600}
+.container{max-width:960px;margin:0 auto}
+.card{background:#fff;border-radius:12px;border:1px solid #e5e7eb;padding:20px;margin-bottom:16px}
+input,select,textarea{width:100%;padding:8px 12px;font-size:13px;border:1px solid #d1d5db;border-radius:8px;background:#fff;color:#111;outline:none;font-family:inherit}
+input:focus,select:focus,textarea:focus{border-color:#6366f1;box-shadow:0 0 0 3px rgba(99,102,241,.1)}
+.btn{padding:8px 16px;font-size:13px;border:1px solid #d1d5db;border-radius:8px;background:#fff;color:#111;cursor:pointer;font-family:inherit;display:inline-flex;align-items:center;gap:5px;transition:all .15s;white-space:nowrap}
+.btn:hover:not([disabled]){background:#f9fafb;border-color:#9ca3af}
+.btn[disabled]{opacity:.4;cursor:not-allowed}
+.btn-primary{background:#6366f1;color:#fff;border-color:#6366f1}
+.btn-primary:hover:not([disabled]){background:#4f46e5}
+.btn-green{background:#10b981;color:#fff;border-color:#10b981}
+.btn-green:hover:not([disabled]){background:#059669}
+.btn-orange{background:#f59e0b;color:#fff;border-color:#f59e0b}
+.btn-icon{padding:3px 7px;border:none;background:none;cursor:pointer;font-size:15px;border-radius:6px;line-height:1}
+.btn-icon:hover{background:#f3f4f6}
+.tab{padding:9px 16px;font-size:13px;border:none;border-bottom:2px solid transparent;background:none;cursor:pointer;color:#6b7280;font-family:inherit;transition:all .15s}
+.tab.active{color:#111;border-bottom-color:#6366f1;font-weight:600}
+.badge{display:inline-block;padding:2px 10px;border-radius:6px;font-size:12px;font-weight:500}
+table{width:100%;border-collapse:collapse;font-size:13px}
+th{padding:9px 12px;text-align:left;font-weight:500;font-size:11px;color:#6b7280;border-bottom:1px solid #e5e7eb;background:#f9fafb;white-space:nowrap}
+td{padding:9px 12px;border-bottom:1px solid #f3f4f6;vertical-align:top}
+tr:hover td{background:#fafafa}
+tr:last-child td{border-bottom:none}
+.row-we td{background:#fffbeb!important}
+.row-he td{background:#fdf4ff!important}
+.empty{padding:40px;text-align:center;border:1px dashed #d1d5db;border-radius:12px;color:#9ca3af;font-size:13px}
+.alert{padding:10px 14px;border-radius:8px;font-size:12px;margin-bottom:12px;display:flex;align-items:flex-start;gap:8px;flex-wrap:wrap}
+.alert-warn{background:#fef3c7;color:#92400e;border:1px solid #fde68a}
+.alert-info{background:#dbeafe;color:#1d4ed8;border:1px solid #bfdbfe}
+.msg-err{font-size:12px;color:#dc2626;margin-top:6px}
+.label{font-size:12px;color:#6b7280;display:block;margin-bottom:5px;font-weight:500}
+.section-title{font-size:14px;font-weight:600;color:#111;margin-bottom:14px}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.grid3{display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:14px}
+.flex-row{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+.member-row{display:flex;align-items:center;justify-content:space-between;padding:9px 14px;border-top:1px solid #f3f4f6}
+.avatar{width:30px;height:30px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:600;flex-shrink:0}
+.modal-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:200;align-items:center;justify-content:center;padding:16px}
+.modal-overlay.open{display:flex}
+.modal{background:#fff;border-radius:16px;padding:24px;max-width:520px;width:100%;max-height:92vh;overflow-y:auto;box-shadow:0 20px 60px rgba(0,0,0,.15)}
+.tag{display:inline-block;font-size:10px;padding:1px 7px;border-radius:4px;font-weight:500;margin-left:4px}
+.tag-we{background:#fef3c7;color:#92400e}
+.tag-he{background:#fce7f3;color:#9d174d}
+.tag-sp{background:#ede9fe;color:#5b21b6}
+.tag-sw{background:#fce7f3;color:#be185d}
+.tag-ex{background:#d1fae5;color:#065f46}
+.tag-in{background:#f3f4f6;color:#9ca3af;font-size:11px;padding:1px 7px;border-radius:5px}
+.info-box{background:#f9fafb;border-radius:8px;padding:10px 14px;margin-bottom:14px;font-size:13px}
+.wa-link{color:#25d366;text-decoration:none;font-size:11px;display:inline-flex;align-items:center;gap:3px;margin-top:2px}
+.preview-scroll{max-height:320px;overflow-y:auto}
+.chip-row{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:8px;min-height:8px}
+</style>
+</head>
+<body>
+<div class="container" id="app"></div>
+
+<!-- Modal Feriados -->
+<div class="modal-overlay" id="modal-feriados">
+<div class="modal" style="max-width:480px">
+  <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:18px">
+    <div><strong>&#127881; Feriados</strong><br><span style="font-size:12px;color:#6b7280">Plantao especial: 08:00 - 18:00</span></div>
+    <button class="btn-icon" onclick="closeModal('modal-feriados')">&#10005;</button>
+  </div>
+  <div class="grid2" style="margin-bottom:10px">
+    <div><label class="label">Data</label><input type="date" id="fer-data"/></div>
+    <div><label class="label">Nome</label><input id="fer-nome" placeholder="Ex: Natal"/></div>
+  </div>
+  <button class="btn btn-primary" style="width:100%;justify-content:center;margin-bottom:16px" onclick="addFeriado()">+ Adicionar feriado</button>
+  <div id="fer-list"></div>
+</div>
+</div>
+
+<!-- Modal Editar Escala -->
+<div class="modal-overlay" id="modal-edit">
+<div class="modal">
+  <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:18px">
+    <div><strong id="edit-title"></strong><br><span id="edit-dow" style="font-size:12px;color:#6b7280"></span></div>
+    <button class="btn-icon" onclick="closeModal('modal-edit')">&#10005;</button>
+  </div>
+  <div class="info-box" id="edit-current"></div>
+  <div style="margin-bottom:14px">
+    <label class="label" style="font-weight:600">Tipo de plantao</label>
+    <div class="flex-row" id="edit-tipo-btns"></div>
+  </div>
+  <div style="margin-bottom:14px">
+    <label class="label" style="font-weight:600">Plantonistas extras</label>
+    <div class="chip-row" id="edit-extras-chips"></div>
+    <div class="flex-row">
+      <select id="edit-extra-pl" style="flex:1"></select>
+      <select id="edit-extra-team" style="width:135px">
+        <option value="infra">Infra</option>
+        <option value="sre">SRE</option>
+        <option value="atendimento" selected>Atendimento</option>
+      </select>
+      <button class="btn btn-green" onclick="addExtra()">+ Extra</button>
+    </div>
+    <p style="font-size:11px;color:#9ca3af;margin-top:4px">Reforco alem dos plantonistas ja escalados.</p>
+  </div>
+  <div style="margin-bottom:16px">
+    <label class="label" style="font-weight:600">Observacao</label>
+    <textarea id="edit-obs" rows="2" placeholder="Condicoes especiais deste plantao..."></textarea>
+  </div>
+  <div class="flex-row" style="justify-content:flex-end">
+    <button class="btn" onclick="closeModal('modal-edit')">Cancelar</button>
+    <button class="btn btn-primary" onclick="saveEditEsc()">&#128190; Salvar</button>
+  </div>
+</div>
+</div>
+
+<!-- Modal Troca -->
+<div class="modal-overlay" id="modal-swap">
+<div class="modal">
+  <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:18px">
+    <div><strong>&#128260; Registrar Troca</strong><br><span id="swap-subtitle" style="font-size:12px;color:#6b7280"></span></div>
+    <button class="btn-icon" onclick="closeModal('modal-swap')">&#10005;</button>
+  </div>
+  <div style="margin-bottom:12px">
+    <label class="label" style="font-weight:600">Time para troca</label>
+    <div class="flex-row" id="swap-team-btns"></div>
+  </div>
+  <div class="info-box" id="swap-current"></div>
+  <div style="margin-bottom:12px">
+    <label class="label" style="font-weight:600">Trocar com o plantao do dia:</label>
+    <select id="swap-target" onchange="updateSwapPreview()"></select>
+  </div>
+  <div id="swap-preview" style="margin-bottom:12px"></div>
+  <div style="margin-bottom:16px">
+    <label class="label">Motivo (opcional)</label>
+    <input id="swap-obs" placeholder="Motivo da troca..."/>
+  </div>
+  <div class="flex-row" style="justify-content:flex-end">
+    <button class="btn" onclick="closeModal('modal-swap')">Cancelar</button>
+    <button class="btn btn-orange" onclick="confirmSwap()">&#128260; Confirmar troca</button>
+  </div>
+</div>
+</div>
+
+<script>
+var KEY_PL="plt5-plantonistas",KEY_ES="plt5-escalas",KEY_FE="plt5-feriados";
+var TEAMS=[
+  {id:"infra",      label:"Infra",       bg:"#dbeafe",c:"#1d4ed8"},
+  {id:"sre",        label:"SRE",         bg:"#fef3c7",c:"#92400e"},
+  {id:"atendimento",label:"Atendimento", bg:"#d1fae5",c:"#065f46"}
+];
+var DIAS_FULL=["Domingo","Segunda-feira","Terca-feira","Quarta-feira","Quinta-feira","Sexta-feira","Sabado"];
+
+var S={
+  tab:"plantonistas",pls:[],esc:[],fer:[],
+  ps:monthStart(),pe:monthEnd(),respWE:true,prev:[],showPrev:false,
+  filterPl:"",
+  editId:null,editTipo:"normal",editExtras:[],editObs:"",
+  swapId:null,swapTeam:"infra",
+  plName:"",plTeam:"infra",plPhone:"",plAtivo:true,plEditId:null,plErr:"",genErr:""
+};
+
+function load(){
+  try{S.pls=JSON.parse(localStorage.getItem(KEY_PL)||"[]");}catch(e){S.pls=[];}
+  try{S.esc=JSON.parse(localStorage.getItem(KEY_ES)||"[]");}catch(e){S.esc=[];}
+  try{S.fer=JSON.parse(localStorage.getItem(KEY_FE)||"[]");}catch(e){S.fer=[];}
+}
+function savePls(){localStorage.setItem(KEY_PL,JSON.stringify(S.pls));}
+function saveEsc(){localStorage.setItem(KEY_ES,JSON.stringify(S.esc));}
+function saveFer(){localStorage.setItem(KEY_FE,JSON.stringify(S.fer));}
+
+function fmt(s){if(!s)return"";var p=s.split("-");return p[2]+"/"+p[1]+"/"+p[0];}
+function nextDay(s){var d=new Date(s+"T12:00:00");d.setDate(d.getDate()+1);return d.toISOString().split("T")[0];}
+function dowOf(s){return new Date(s+"T12:00:00").getDay();}
+function isWE(s){var d=dowOf(s);return d===0||d===6;}
+function dowFull(s){return DIAS_FULL[dowOf(s)]||"";}
+function monthStart(){var d=new Date();return d.getFullYear()+"-"+pad(d.getMonth()+1)+"-01";}
+function monthEnd(){var d=new Date();d.setMonth(d.getMonth()+1);d.setDate(0);return d.toISOString().split("T")[0];}
+function today(){return new Date().toISOString().split("T")[0];}
+function addDays(n){var d=new Date();d.setDate(d.getDate()+n);return d.toISOString().split("T")[0];}
+function pad(n){return String(n).padStart(2,"0");}
+function dateRange(s,e){var ds=[],c=new Date(s+"T12:00:00"),l=new Date(e+"T12:00:00");while(c<=l){ds.push(c.toISOString().split("T")[0]);c.setDate(c.getDate()+1);}return ds;}
+function getWeekNum(s){var d=new Date(s+"T12:00:00");d.setHours(0,0,0,0);d.setDate(d.getDate()+4-(d.getDay()||7));var y=new Date(d.getFullYear(),0,1);return Math.ceil((((d-y)/86400000)+1)/7);}
+function waLink(phone){if(!phone)return null;return"https://wa.me/"+phone.replace(/\D/g,"");}
+function isFeriado(d){return S.fer.some(function(f){return f.data===d;});}
+function getFerNome(d){var f=S.fer.find(function(f){return f.data===d;});return f?f.nome:"";}
+function getNome(id){var p=S.pls.find(function(p){return p.id===id;});return p?p.nome:"?";}
+function getTeamOf(id){var p=S.pls.find(function(p){return p.id===id;});return p?p.time:"";}
+function getPhone(id){var p=S.pls.find(function(p){return p.id===id;});return p&&p.phone?p.phone:"";}
+function activePls(){return S.pls.filter(function(p){return p.ativo!==false;});}
+function tc(tid){return TEAMS.find(function(t){return t.id===tid;})||{bg:"#e5e7eb",c:"#374151"};}
+function badge(nome,tid){var t=tc(tid);return'<span class="badge" style="background:'+t.bg+';color:'+t.c+'">'+he(nome)+'</span>';}
+function he(s){return String(s).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;");}
+function shuf(a){var b=a.slice();for(var i=b.length-1;i>0;i--){var j=Math.floor(Math.random()*(i+1));var tmp=b[i];b[i]=b[j];b[j]=tmp;}return b;}
+
+function render(){document.getElementById("app").innerHTML=renderApp();bindEvents();}
+
+function renderApp(){
+  var ativos=activePls();
+  var tc_html=TEAMS.map(function(t){return'<span class="badge" style="background:'+t.bg+';color:'+t.c+'">'+t.label+": "+ativos.filter(function(p){return p.time===t.id;}).length+"</span>";}).join(" ");
+  return'<div style="display:flex;align-items:center;gap:14px;margin-bottom:24px;flex-wrap:wrap">'+
+    '<div style="width:48px;height:48px;border-radius:12px;background:#eef2ff;display:flex;align-items:center;justify-content:center;font-size:24px;flex-shrink:0">&#127769;</div>'+
+    '<div><h1>Escala de Plantao</h1><p style="font-size:13px;color:#6b7280;margin-top:2px">18:00 &#8594; 08:00 &middot; feriados 08:00 &#8594; 18:00</p></div>'+
+    '<div style="margin-left:auto;display:flex;gap:8px;flex-wrap:wrap;align-items:center">'+tc_html+
+    '<button class="btn" style="font-size:11px;padding:5px 10px" onclick="openModal(\'modal-feriados\');renderFerList()">&#128197; Feriados ('+S.fer.length+')</button></div></div>'+
+    '<div style="border-bottom:1px solid #e5e7eb;margin-bottom:20px;display:flex;overflow-x:auto">'+
+    ['plantonistas','escala','visualizar'].map(function(t,i){
+      var labels=["&#128101; Plantonistas","&#127922; Gerar Escala","&#128203; Visualizar"];
+      return'<button class="tab'+(S.tab===t?" active":"")+'" onclick="setTab(\''+t+'\')">'+labels[i]+'</button>';
+    }).join("")+'</div>'+
+    (S.tab==="plantonistas"?renderPlantonistas():"")+
+    (S.tab==="escala"?renderEscala():"")+
+    (S.tab==="visualizar"?renderVisualizar():"");
+}
+
+function renderPlantonistas(){
+  var isEdit=!!S.plEditId;
+  var byTeam=TEAMS.map(function(t){return{id:t.id,label:t.label,bg:t.bg,c:t.c,members:S.pls.filter(function(p){return p.time===t.id;})};});
+  var form='<div class="card"><p class="section-title">'+(isEdit?"&#9998; Editar plantonista":"&#43; Novo plantonista")+'</p>'+
+    '<div class="grid2" style="margin-bottom:10px">'+
+    '<div><label class="label">Nome</label><input id="pl-name" value="'+he(S.plName)+'" oninput="S.plName=this.value" placeholder="Nome..."/></div>'+
+    '<div><label class="label">Time</label><select id="pl-team" onchange="S.plTeam=this.value">'+
+    TEAMS.map(function(t){return'<option value="'+t.id+'"'+(S.plTeam===t.id?" selected":"")+'>'+t.label+'</option>';}).join("")+
+    '</select></div>'+
+    '<div><label class="label">Telefone / WhatsApp</label><input id="pl-phone" value="'+he(S.plPhone)+'" oninput="S.plPhone=this.value" placeholder="5511999999999 (com DDI)"/></div>'+
+    '<div style="display:flex;align-items:flex-end;padding-bottom:4px">'+
+    '<label style="display:flex;align-items:center;gap:8px;cursor:pointer;font-size:13px">'+
+    '<input type="checkbox" id="pl-ativo" '+(S.plAtivo?"checked":"")+' onchange="S.plAtivo=this.checked" style="width:auto;margin:0"/>'+
+    'Ativo para plantao</label></div></div>'+
+    (S.plErr?'<p class="msg-err">'+he(S.plErr)+'</p>':"")+
+    '<div class="flex-row">'+
+    '<button class="btn btn-primary" onclick="submitPl()">'+(isEdit?"&#128190; Salvar":"+ Adicionar")+'</button>'+
+    (isEdit?'<button class="btn" onclick="cancelEditPl()">Cancelar</button>':"")+'</div></div>';
+  var cards=byTeam.map(function(t){
+    var rows=t.members.length===0?'<div style="padding:16px;font-size:12px;color:#9ca3af;text-align:center">Sem plantonistas</div>':
+      t.members.map(function(p){
+        var wl=p.phone?waLink(p.phone):null;
+        return'<div class="member-row" style="opacity:'+(p.ativo===false?0.6:1)+'">'+
+          '<div style="display:flex;align-items:center;gap:10px;flex:1;min-width:0">'+
+          '<div class="avatar" style="background:'+t.bg+';color:'+t.c+'">'+p.nome[0].toUpperCase()+'</div>'+
+          '<div style="flex:1;min-width:0">'+
+          '<div style="font-size:13px;font-weight:'+(p.ativo===false?400:500)+'">'+he(p.nome)+(p.ativo===false?'<span class="tag-in" style="margin-left:6px">inativo</span>':"")+'</div>'+
+          (wl?'<a href="'+he(wl)+'" target="_blank" class="wa-link">&#128241; WhatsApp</a>':"")+
+          '</div></div>'+
+          '<div style="display:flex;gap:2px">'+
+          '<button class="btn-icon" title="Editar" onclick="startEditPl(\''+p.id+'\')">&#9998;</button>'+
+          '<button class="btn-icon" title="Remover" style="color:#9ca3af" onclick="removePl(\''+p.id+'\')">&#128465;</button>'+
+          '</div></div>';
+      }).join("");
+    return'<div class="card" style="padding:0;overflow:hidden">'+
+      '<div style="padding:10px 16px;background:'+t.bg+';display:flex;align-items:center;justify-content:space-between">'+
+      '<span style="font-weight:600;font-size:13px;color:'+t.c+'">'+t.label+'</span>'+
+      '<span style="font-size:11px;color:'+t.c+';opacity:.8">'+t.members.filter(function(m){return m.ativo!==false;}).length+"/"+t.members.length+" ativos</span>"+
+      '</div>'+rows+'</div>';
+  }).join("");
+  return form+'<div class="grid3">'+cards+'</div>'+
+    '<p style="font-size:12px;color:#9ca3af;margin-top:12px">'+S.pls.length+' plantonista'+(S.pls.length!==1?"s":"")+" &middot; "+activePls().length+" ativo"+(activePls().length!==1?"s":"")+'</p>';
+}
+
+function renderEscala(){
+  var ativos=activePls();
+  var missing=TEAMS.filter(function(t){return ativos.filter(function(p){return p.time===t.id;}).length===0;});
+  var range=(S.ps&&S.pe&&S.ps<=S.pe)?dateRange(S.ps,S.pe):[];
+  var ferN=range.filter(isFeriado);var weN=range.filter(isWE);
+  var html="";
+  if(missing.length)html+='<div class="alert alert-warn">&#9888; Times sem plantonistas ativos: '+missing.map(function(t){return t.label;}).join(", ")+
+    '<button class="btn" style="margin-left:auto;font-size:11px;padding:2px 10px" onclick="setTab(\'plantonistas\')">Cadastrar &#8594;</button></div>';
+  html+='<div class="card" style="max-width:540px"><p class="section-title">Periodo do plantao</p>'+
+    '<div class="grid2" style="margin-bottom:12px">'+
+    '<div><label class="label">Data inicio</label><input type="date" value="'+S.ps+'" onchange="S.ps=this.value;render()"/></div>'+
+    '<div><label class="label">Data fim</label><input type="date" value="'+S.pe+'" min="'+S.ps+'" onchange="S.pe=this.value;render()"/></div></div>';
+  if(range.length){
+    html+='<div style="padding:8px 12px;background:#f3f4f6;border-radius:8px;font-size:12px;color:#6b7280;margin-bottom:12px">'+
+      '&#128197; '+range.length+' dia'+(range.length!==1?"s":"")+" &middot; "+fmt(S.ps)+" &#8594; "+fmt(S.pe)+
+      (ferN.length?'<span style="color:#9d174d;margin-left:8px">&middot; '+ferN.length+' feriado'+(ferN.length>1?"s":"")+'</span>':"")+
+      (weN.length?'<span style="color:#92400e;margin-left:8px">&middot; '+weN.length+' dia'+(weN.length>1?"s":"")+" de FdS</span>":"")+
+      '</div>';
+  }
+  html+='<div class="flex-row" style="margin-bottom:16px">'+
+    '<button class="btn" style="font-size:11px;padding:5px 12px" onclick="S.ps=monthStart();S.pe=monthEnd();render()">Este mes</button>'+
+    '<button class="btn" style="font-size:11px;padding:5px 12px" onclick="S.ps=today();S.pe=addDays(6);render()">Prox. 7 dias</button>'+
+    '<button class="btn" style="font-size:11px;padding:5px 12px" onclick="S.ps=today();S.pe=addDays(29);render()">Prox. 30 dias</button></div>'+
+    '<div style="background:#f9fafb;border-radius:8px;padding:10px 14px;margin-bottom:14px">'+
+    '<p style="font-size:13px;font-weight:600;margin-bottom:8px;color:#374151">&#9881; Regras de geracao</p>'+
+    '<label style="display:flex;align-items:center;gap:8px;cursor:pointer;font-size:13px">'+
+    '<input type="checkbox" '+(S.respWE?"checked ":"")+'onchange="S.respWE=this.checked" style="width:auto;margin:0"/>'+
+    'Evitar fins de semana consecutivos</label></div>'+
+    (S.genErr?'<p class="msg-err">'+he(S.genErr)+'</p>':"")+
+    '<button class="btn btn-primary" style="width:100%;justify-content:center;padding:10px" onclick="sortear()"'+
+    ((!S.ps||!S.pe||S.ps>S.pe)?' disabled':'')+'>&#127922; Sortear Escala</button></div>';
+  if(ferN.length)html+='<div class="alert alert-info" style="max-width:540px;margin-top:10px">'+
+    '&#127881; Feriados no periodo: '+ferN.map(function(d){return'<strong>'+fmt(d)+'</strong> - '+he(getFerNome(d));}).join(" &middot; ")+
+    '<br><span style="opacity:.8">Nesses dias o plantao sera 08:00-18:00</span></div>';
+  if(S.showPrev&&S.prev.length>0)html+=renderPrevia();
+  return html;
+}
+
+function renderPrevia(){
+  var rows=S.prev.map(function(e){
+    var isHol=e.holiday;var isWk=e.weekend;
+    var rc=isHol?"row-he":isWk?"row-we":"";
+    return'<tr class="'+rc+'">'+
+      '<td style="font-weight:500">'+fmt(e.data)+'</td>'+
+      '<td style="font-size:12px;color:#6b7280">'+dowFull(e.data)+'</td>'+
+      '<td>'+(isHol?'<span class="tag tag-he">Feriado &middot; 08-18h</span>':isWk?'<span class="tag tag-we">FdS</span>':'<span style="font-size:11px;color:#9ca3af">Normal</span>')+'</td>'+
+      TEAMS.map(function(t){return'<td>'+badge(getNome(e[t.id]),t.id)+'</td>';}).join("")+
+      '</tr>';
+  }).join("");
+  return'<div style="background:#fff;border:1px solid #e5e7eb;border-radius:12px;overflow:hidden;max-width:820px;margin-top:16px">'+
+    '<div style="padding:10px 14px;background:#f9fafb;border-bottom:1px solid #e5e7eb;display:flex;align-items:center;gap:8px;flex-wrap:wrap">'+
+    '<span style="font-size:13px;font-weight:600">&#128065; Previa - '+S.prev.length+' plantao'+(S.prev.length!==1?"oes":"")+'</span>'+
+    '<div style="margin-left:auto;display:flex;gap:8px">'+
+    '<button class="btn" style="font-size:11px;padding:4px 10px" onclick="sortear()">&#128260; Novo sorteio</button>'+
+    '<button class="btn btn-primary" onclick="confirmarEscala()">&#10003; Confirmar</button></div></div>'+
+    '<div style="display:flex;gap:10px;padding:7px 14px;background:#f9fafb;border-bottom:1px solid #e5e7eb;font-size:11px;color:#6b7280;flex-wrap:wrap">'+
+    '<span style="background:#fffbeb;padding:1px 8px;border-radius:4px">&#129001; Fim de semana</span>'+
+    '<span style="background:#fdf4ff;padding:1px 8px;border-radius:4px">&#128998; Feriado (08-18h)</span></div>'+
+    '<div class="preview-scroll"><table><thead><tr>'+
+    ["Data","Dia","Tipo","Infra","SRE","Atendimento"].map(function(h){return'<th>'+h+'</th>';}).join("")+
+    '</tr></thead><tbody>'+rows+'</tbody></table></div>'+
+    '<div style="padding:10px 14px;border-top:1px solid #e5e7eb;display:flex;gap:8px;justify-content:flex-end">'+
+    '<button class="btn" onclick="S.showPrev=false;render()">Cancelar</button>'+
+    '<button class="btn btn-primary" onclick="confirmarEscala()">&#10003; Confirmar escala</button></div></div>';
+}
+
+function renderVisualizar(){
+  var visEsc=S.filterPl?S.esc.filter(function(e){
+    return e.infra===S.filterPl||e.sre===S.filterPl||e.atendimento===S.filterPl||
+      (e.extras||[]).some(function(x){return x.id===S.filterPl;});
+  }):S.esc;
+  var opts=TEAMS.map(function(t){
+    return'<optgroup label="'+t.label+'">'+
+      S.pls.filter(function(p){return p.time===t.id;}).map(function(p){
+        return'<option value="'+p.id+'"'+(S.filterPl===p.id?" selected":"")+'>'+he(p.nome)+(p.ativo===false?" (inativo)":"")+'</option>';
+      }).join("")+'</optgroup>';
+  }).join("");
+  var html='<div class="flex-row" style="margin-bottom:12px">'+
+    '<select style="flex:1;min-width:200px" onchange="S.filterPl=this.value;render()">'+
+    '<option value="">Todos os plantonistas</option>'+opts+'</select>'+
+    '<button class="btn btn-primary" onclick="exportCSV()"'+(visEsc.length===0?" disabled":"")+'>&#11015; Exportar CSV</button></div>';
+  if(S.filterPl){
+    var ph=getPhone(S.filterPl);var wl=ph?waLink(ph):null;
+    html+='<div class="alert alert-info">&#128100; <strong>'+he(getNome(S.filterPl))+'</strong>'+
+      '<span style="opacity:.8;margin-left:4px">&middot; '+(TEAMS.find(function(t){return t.id===getTeamOf(S.filterPl);})||{label:"?"}).label+
+      ' &middot; '+visEsc.length+' plantao'+(visEsc.length!==1?"oes":"")+'</span>'+
+      (wl?'<a href="'+he(wl)+'" target="_blank" class="wa-link" style="margin-left:8px">&#128241; WhatsApp</a>':"")+
+      '<button onclick="S.filterPl=\'\';render()" class="btn" style="margin-left:auto;font-size:11px;padding:2px 8px;background:none;border:none;cursor:pointer;color:#1d4ed8">&#10005; Limpar</button></div>';
+  }
+  html+='<div class="flex-row" style="font-size:11px;color:#6b7280;margin-bottom:10px;gap:8px">'+
+    '<span style="background:#fffbeb;padding:2px 10px;border-radius:6px;border:1px solid #fde68a">&#129001; Fim de semana</span>'+
+    '<span style="background:#fdf4ff;padding:2px 10px;border-radius:6px;border:1px solid #e9d5ff">&#128998; Feriado</span>'+
+    '<span style="background:#ede9fe;padding:2px 10px;border-radius:6px;border:1px solid #c4b5fd">&#10024; Cond. especial</span></div>';
+  if(visEsc.length===0){
+    html+='<div class="empty">'+(S.esc.length===0?"Nenhuma escala gerada ainda":"Nenhuma escala para este filtro")+'</div>';
+  }else{
+    var rows=visEsc.map(function(e){
+      var isHol=e.holiday||isFeriado(e.data);var isWk=e.weekend||isWE(e.data);
+      var hasSp=e.obs||(e.extras&&e.extras.length>0)||e.swapInfo||e.tipo==="especial";
+      var rc=isHol?"row-he":isWk?"row-we":"";
+      var ini=isHol?"08:00":"18:00";var fim=isHol?"18:00":"08:00";
+      var fimData=isHol?e.data:nextDay(e.data);
+      var teamCells=TEAMS.map(function(t){
+        var exts=(e.extras||[]).filter(function(x){return x.time===t.id;});
+        var sw=e.swapInfo&&e.swapInfo[t.id];
+        return'<td><div>'+badge(getNome(e[t.id]),t.id)+(sw?'<span style="font-size:11px;margin-left:3px">&#128260;</span>':"")+'</div>'+
+          exts.map(function(x){return'<div style="margin-top:3px">'+badge(getNome(x.id),t.id)+' <span class="tag tag-ex">extra</span></div>';}).join("")+'</td>';
+      }).join("");
+      return'<tr class="'+rc+'">'+
+        '<td><div style="font-weight:500">'+fmt(e.data)+'</div><div style="font-size:11px;color:#6b7280">'+dowFull(e.data)+'</div></td>'+
+        '<td>'+fmt(e.data)+' <span style="font-size:11px;color:#9ca3af">'+ini+'</span></td>'+
+        '<td>'+fmt(fimData)+' <span style="font-size:11px;color:#9ca3af">'+fim+'</span></td>'+
+        teamCells+
+        '<td>'+(isHol?'<span class="tag tag-he">Feriado</span>':"")+(!isHol&&isWk?'<span class="tag tag-we">FdS</span>':"")+
+        (hasSp?'<span class="tag tag-sp">especial</span>':"")+(e.swapInfo?'<span class="tag tag-sw">troca</span>':"")+
+        (e.obs?'<div style="font-size:11px;color:#6b7280;margin-top:3px">'+he(e.obs)+'</div>':"")+'</td>'+
+        '<td><div style="display:flex;gap:2px">'+
+        '<button class="btn-icon" title="Editar" onclick="openEditEsc(\''+e.id+'\')">&#9998;</button>'+
+        '<button class="btn-icon" title="Troca" onclick="openSwap(\''+e.id+'\')">&#128260;</button>'+
+        '<button class="btn-icon" title="Remover" style="color:#9ca3af" onclick="removeEsc(\''+e.id+'\')">&#128465;</button>'+
+        '</div></td></tr>';
+    }).join("");
+    html+='<div class="card" style="padding:0;overflow:hidden"><div style="overflow-x:auto"><table>'+
+      '<thead><tr>'+["Dia","Inicio","Fim","Infra","SRE","Atendimento","Info","Acoes"].map(function(h){return'<th>'+h+'</th>';}).join("")+'</tr></thead>'+
+      '<tbody>'+rows+'</tbody></table></div></div>';
+  }
+  if(S.esc.length>0)html+='<p style="font-size:12px;color:#9ca3af;margin-top:10px">Mostrando '+visEsc.length+' de '+S.esc.length+' escala'+(S.esc.length!==1?"s":"")+'</p>';
+  return html;
+}
+
+function submitPl(){
+  var nome=S.plName.trim();
+  if(!nome){S.plErr="Informe o nome.";render();return;}
+  var dup=S.pls.some(function(p){return p.nome.toLowerCase()===nome.toLowerCase()&&p.time===S.plTeam&&p.id!==S.plEditId;});
+  if(dup){S.plErr="Ja existe neste time.";render();return;}
+  var ativo=document.getElementById("pl-ativo")?document.getElementById("pl-ativo").checked:S.plAtivo;
+  if(S.plEditId){
+    S.pls=S.pls.map(function(p){return p.id===S.plEditId?Object.assign({},p,{nome:nome,time:S.plTeam,phone:S.plPhone.trim(),ativo:ativo}):p;});
+    S.plEditId=null;
+  }else{
+    S.pls.push({id:Date.now().toString(),nome:nome,time:S.plTeam,phone:S.plPhone.trim(),ativo:ativo});
+  }
+  savePls();S.plName="";S.plPhone="";S.plAtivo=true;S.plErr="";render();
+}
+function startEditPl(id){
+  var p=S.pls.find(function(x){return x.id===id;});if(!p)return;
+  S.plEditId=id;S.plName=p.nome;S.plTeam=p.time;S.plPhone=p.phone||"";S.plAtivo=p.ativo!==false;S.plErr="";
+  render();var el=document.getElementById("pl-name");if(el)el.focus();
+}
+function cancelEditPl(){S.plEditId=null;S.plName="";S.plPhone="";S.plAtivo=true;S.plErr="";render();}
+function removePl(id){S.pls=S.pls.filter(function(p){return p.id!==id;});savePls();render();}
+
+function sortear(){
+  var ativos=activePls();
+  var miss=TEAMS.filter(function(t){return ativos.filter(function(p){return p.time===t.id;}).length===0;}).map(function(t){return t.label;});
+  if(miss.length){S.genErr="Sem plantonistas ativos: "+miss.join(", ");render();return;}
+  S.genErr="";
+  var dates=dateRange(S.ps,S.pe);
+  var pools={};
+  TEAMS.forEach(function(t){pools[t.id]=shuf(ativos.filter(function(p){return p.time===t.id;}));});
+  var cnt={infra:0,sre:0,atendimento:0};
+  var lastWE={};
+  S.esc.forEach(function(e){
+    if(isWE(e.data)){var wk=getWeekNum(e.data);TEAMS.forEach(function(t){if(e[t.id]){if(!lastWE[e[t.id]]||lastWE[e[t.id]]<wk)lastWE[e[t.id]]=wk;}});}
+  });
+  S.prev=dates.map(function(data){
+    var holiday=isFeriado(data);var weekend=isWE(data);var wk=getWeekNum(data);
+    var e={id:(Date.now()+Math.random()).toString(),data:data,holiday:holiday,weekend:weekend,tipo:holiday?"feriado":weekend?"fds":"normal",extras:[],obs:""};
+    TEAMS.forEach(function(t){
+      var pool=pools[t.id];var idx=cnt[t.id]%pool.length;
+      if(S.respWE&&weekend){
+        for(var tries=0;tries<pool.length;tries++){
+          var cand=pool[(idx+tries)%pool.length];
+          if((lastWE[cand.id]||0)<wk-1){idx=(idx+tries)%pool.length;break;}
+        }
+      }
+      var chosen=pool[idx];e[t.id]=chosen.id;
+      if(weekend)lastWE[chosen.id]=wk;
+      cnt[t.id]++;
+    });
+    return e;
+  });
+  S.showPrev=true;render();
+}
+function confirmarEscala(){
+  var ds={};S.prev.forEach(function(e){ds[e.data]=true;});
+  var kept=S.esc.filter(function(e){return!ds[e.data];});
+  S.esc=kept.concat(S.prev).sort(function(a,b){return a.data.localeCompare(b.data);});
+  saveEsc();S.showPrev=false;S.prev=[];S.tab="visualizar";render();
+}
+function removeEsc(id){S.esc=S.esc.filter(function(e){return e.id!==id;});saveEsc();render();}
+
+function exportCSV(){
+  var visEsc=S.filterPl?S.esc.filter(function(e){
+    return e.infra===S.filterPl||e.sre===S.filterPl||e.atendimento===S.filterPl||
+      (e.extras||[]).some(function(x){return x.id===S.filterPl;});
+  }):S.esc;
+  var headers=["Data","Dia da Semana","Tipo","Inicio","Fim","Infra","SRE","Atendimento","Extras","Observacao"];
+  var rows=visEsc.map(function(e){
+    var isHol=e.holiday||isFeriado(e.data);
+    return[
+      fmt(e.data),dowFull(e.data),isHol?"Feriado":e.weekend?"FdS":"Normal",
+      fmt(e.data)+" "+(isHol?"08:00":"18:00"),
+      isHol?fmt(e.data)+" 18:00":fmt(nextDay(e.data))+" 08:00",
+      getNome(e.infra),getNome(e.sre),getNome(e.atendimento),
+      (e.extras||[]).map(function(x){return getNome(x.id)+" ("+x.time+")";}).join("; "),
+      e.obs||""
+    ].map(function(v){return'"'+String(v).replace(/"/g,'""')+'"';}).join(",");
+  });
+  var csv="\uFEFF"+headers.join(",")+"\n"+rows.join("\n");
+  var blob=new Blob([csv],{type:"text/csv;charset=utf-8;"});
+  var a=document.createElement("a");a.href=URL.createObjectURL(blob);a.download="escala-plantao.csv";a.click();
+}
+
+function addFeriado(){
+  var data=document.getElementById("fer-data").value;
+  var nome=document.getElementById("fer-nome").value.trim();
+  if(!data||!nome)return;
+  if(S.fer.some(function(f){return f.data===data;})){alert("Feriado ja cadastrado nessa data.");return;}
+  S.fer.push({id:Date.now().toString(),data:data,nome:nome});
+  S.fer.sort(function(a,b){return a.data.localeCompare(b.data);});
+  saveFer();renderFerList();render();
+  document.getElementById("fer-nome").value="";document.getElementById("fer-data").value="";
+}
+function removeFeriado(id){S.fer=S.fer.filter(function(f){return f.id!==id;});saveFer();renderFerList();render();}
+function renderFerList(){
+  var el=document.getElementById("fer-list");if(!el)return;
+  if(S.fer.length===0){el.innerHTML='<div class="empty" style="padding:20px">Nenhum feriado cadastrado</div>';return;}
+  el.innerHTML='<div style="border:1px solid #e5e7eb;border-radius:8px;overflow:hidden">'+
+    S.fer.map(function(f){
+      return'<div style="display:flex;align-items:center;padding:8px 12px;border-bottom:1px solid #f3f4f6;gap:10px">'+
+        '<span style="font-weight:500;font-size:13px">'+fmt(f.data)+'</span>'+
+        '<span style="font-size:12px;color:#6b7280">'+dowFull(f.data)+'</span>'+
+        '<span style="flex:1;font-size:13px">'+he(f.nome)+'</span>'+
+        '<button class="btn-icon" style="color:#9ca3af" onclick="removeFeriado(\''+f.id+'\')">&#128465;</button>'+
+        '</div>';
+    }).join("")+'</div>';
+}
+
+function openEditEsc(id){
+  var e=S.esc.find(function(x){return x.id===id;});if(!e)return;
+  S.editId=id;S.editTipo=e.tipo||"normal";S.editExtras=(e.extras||[]).slice();S.editObs=e.obs||"";
+  document.getElementById("edit-title").textContent=fmt(e.data);
+  document.getElementById("edit-dow").textContent=dowFull(e.data);
+  document.getElementById("edit-obs").value=S.editObs;
+  document.getElementById("edit-current").innerHTML=
+    '<p style="font-size:12px;font-weight:600;margin-bottom:8px;color:#374151">Escala atual</p>'+
+    '<div class="flex-row">'+TEAMS.map(function(t){return badge(getNome(e[t.id]),t.id)+' <span style="font-size:11px;color:#6b7280">('+t.label+')</span>';}).join(" ")+'</div>';
+  renderEditTipoBtns();renderEditExtraChips();renderEditExtraPl(e);
+  openModal("modal-edit");
+}
+function renderEditTipoBtns(){
+  var opts=[{v:"normal",l:"&#127769; Normal (18-08h)"},{v:"feriado",l:"&#127881; Feriado (08-18h)"},{v:"especial",l:"&#10024; Cond. especial"}];
+  document.getElementById("edit-tipo-btns").innerHTML=opts.map(function(o){
+    return'<button class="btn" style="font-size:12px;padding:5px 12px;'+(S.editTipo===o.v?"background:#6366f1;color:#fff;border-color:#6366f1":"")+'" onclick="S.editTipo=\''+o.v+'\';renderEditTipoBtns()">'+o.l+'</button>';
+  }).join("");
+}
+function renderEditExtraChips(){
+  var el=document.getElementById("edit-extras-chips");if(!el)return;
+  el.innerHTML=S.editExtras.map(function(x){
+    var t2=tc(x.time);
+    return'<span class="badge" style="background:'+t2.bg+';color:'+t2.c+';display:inline-flex;align-items:center;gap:4px">'+
+      he(getNome(x.id))+' ('+(TEAMS.find(function(t){return t.id===x.time;})||{label:"?"}).label+')'+
+      '<button onclick="S.editExtras=S.editExtras.filter(function(e){return!(e.id===\''+x.id+'\'&&e.time===\''+x.time+'\')});renderEditExtraChips()" style="background:none;border:none;cursor:pointer;font-size:12px;color:inherit;padding:0;line-height:1">&#10005;</button>'+
+      '</span>';
+  }).join("");
+}
+function renderEditExtraPl(escEntry){
+  var el=document.getElementById("edit-extra-pl");if(!el)return;
+  var e=escEntry||S.esc.find(function(x){return x.id===S.editId;});if(!e)return;
+  var escalados=TEAMS.map(function(t){return e[t.id];}).filter(Boolean);
+  var disp=S.pls.filter(function(p){
+    return p.ativo!==false&&escalados.indexOf(p.id)===-1&&
+      !S.editExtras.some(function(x){return x.id===p.id;});
+  });
+  el.innerHTML='<option value="">Selecione plantonista...</option>'+
+    TEAMS.map(function(t){
+      return'<optgroup label="'+t.label+'">'+disp.filter(function(p){return p.time===t.id;}).map(function(p){
+        return'<option value="'+p.id+'">'+he(p.nome)+'</option>';
+      }).join("")+'</optgroup>';
+    }).join("");
+}
+function addExtra(){
+  var pl=document.getElementById("edit-extra-pl").value;
+  var team=document.getElementById("edit-extra-team").value;
+  if(!pl)return;
+  if(S.editExtras.some(function(x){return x.id===pl;}))return;
+  S.editExtras.push({id:pl,time:team});
+  renderEditExtraChips();renderEditExtraPl();
+}
+function saveEditEsc(){
+  var obs=document.getElementById("edit-obs").value;
+  S.esc=S.esc.map(function(e){
+    return e.id===S.editId?Object.assign({},e,{tipo:S.editTipo,holiday:S.editTipo==="feriado",extras:S.editExtras,obs:obs}):e;
+  });
+  saveEsc();closeModal("modal-edit");render();
+}
+
+function openSwap(id){
+  var e=S.esc.find(function(x){return x.id===id;});if(!e)return;
+  S.swapId=id;S.swapTeam="infra";
+  document.getElementById("swap-subtitle").textContent=fmt(e.data)+" - "+dowFull(e.data);
+  renderSwapTeamBtns();renderSwapCurrent();renderSwapTarget();
+  openModal("modal-swap");
+}
+function renderSwapTeamBtns(){
+  var el=document.getElementById("swap-team-btns");if(!el)return;
+  el.innerHTML=TEAMS.map(function(t){
+    var t2=tc(t.id);
+    return'<button class="btn" style="font-size:12px;padding:5px 12px;'+(S.swapTeam===t.id?"background:"+t2.bg+";color:"+t2.c+";border-color:"+t2.c:"")+'" onclick="S.swapTeam=\''+t.id+'\';renderSwapTeamBtns();renderSwapCurrent();renderSwapTarget()">'+t.label+'</button>';
+  }).join("");
+}
+function renderSwapCurrent(){
+  var el=document.getElementById("swap-current");if(!el)return;
+  var e=S.esc.find(function(x){return x.id===S.swapId;});if(!e)return;
+  var tlabel=(TEAMS.find(function(t){return t.id===S.swapTeam;})||{label:"?"}).label;
+  el.innerHTML='<strong style="font-size:13px">Plantonista atual ('+tlabel+'):</strong> '+badge(getNome(e[S.swapTeam]),S.swapTeam);
+}
+function renderSwapTarget(){
+  var el=document.getElementById("swap-target");if(!el)return;
+  var others=S.esc.filter(function(e){return e.id!==S.swapId&&e[S.swapTeam];});
+  el.innerHTML='<option value="">Selecione um dia...</option>'+others.map(function(e){
+    return'<option value="'+e.id+'">'+fmt(e.data)+' ('+dowFull(e.data)+') - '+he(getNome(e[S.swapTeam]))+'</option>';
+  }).join("");
+  updateSwapPreview();
+}
+function updateSwapPreview(){
+  var el=document.getElementById("swap-preview");if(!el)return;
+  var tid=document.getElementById("swap-target");var targetId=tid?tid.value:"";
+  if(!targetId){el.innerHTML="";return;}
+  var eA=S.esc.find(function(x){return x.id===S.swapId;});
+  var eB=S.esc.find(function(x){return x.id===targetId;});
+  if(!eA||!eB){el.innerHTML="";return;}
+  el.innerHTML='<div style="background:#ede9fe;border-radius:8px;padding:10px 14px;font-size:12px;color:#5b21b6">'+
+    '<strong>Resultado da troca:</strong><br>'+
+    fmt(eA.data)+': <strong>'+he(getNome(eB[S.swapTeam]))+'</strong> (era '+he(getNome(eA[S.swapTeam]))+')'+
+    '<br>'+fmt(eB.data)+': <strong>'+he(getNome(eA[S.swapTeam]))+'</strong> (era '+he(getNome(eB[S.swapTeam]))+')'+
+    '</div>';
+}
+function confirmSwap(){
+  var tid=document.getElementById("swap-target");var targetId=tid?tid.value:"";
+  var obs=document.getElementById("swap-obs")?document.getElementById("swap-obs").value:"";
+  if(!targetId)return;
+  var eA=S.esc.find(function(x){return x.id===S.swapId;});
+  var eB=S.esc.find(function(x){return x.id===targetId;});
+  if(!eA||!eB)return;
+  var plA=eA[S.swapTeam];var plB=eB[S.swapTeam];
+  S.esc=S.esc.map(function(e){
+    if(e.id===eA.id){var si=Object.assign({},e.swapInfo||{});si[S.swapTeam]=true;var newObs=obs?((e.obs?e.obs+" | ":"")+"Troca: "+obs):e.obs;return Object.assign({},e,{[S.swapTeam]:plB,swapInfo:si,obs:newObs});}
+    if(e.id===eB.id){var si2=Object.assign({},e.swapInfo||{});si2[S.swapTeam]=true;return Object.assign({},e,{[S.swapTeam]:plA,swapInfo:si2});}
+    return e;
+  });
+  saveEsc();closeModal("modal-swap");render();
+}
+
+function openModal(id){document.getElementById(id).classList.add("open");}
+function closeModal(id){document.getElementById(id).classList.remove("open");}
+function setTab(t){S.tab=t;render();}
+function bindEvents(){
+  document.querySelectorAll(".modal-overlay").forEach(function(el){
+    el.addEventListener("click",function(ev){if(ev.target===el)el.classList.remove("open");});
+  });
+}
+
+load();render();
+</script>
+</body>
+</html>
